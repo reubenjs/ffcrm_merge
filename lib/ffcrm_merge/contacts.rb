@@ -34,6 +34,17 @@ module Merge
         self.comments.each do |c|
           c.commentable = master; c.save!
         end
+        self.attendances.each do |a|
+          a.contact = master; a.save!
+        end
+        
+        # Copy weekly emails, supporter emails across
+        master.cf_weekly_emails += self.cf_weekly_emails if self.cf_weekly_emails
+        master.cf_weekly_emails.reject!(&:blank?)
+        master.cf_weekly_emails.uniq!
+        master.cf_supporter_emails += self.cf_supporter_emails if self.cf_supporter_emails
+        master.cf_supporter_emails.reject!(&:blank?)
+        master.cf_supporter_emails.uniq!
 
         # Copy addresses over
         self.addresses.each{|a| a.addressable = master; a.save!}
@@ -43,6 +54,14 @@ module Merge
         AccountContact.find_all_by_contact_id(self.id).each do |ac|
           unless ac.account.contacts.include?(master)
             ac.contact_id = master.id; ac.save!
+          end
+        end
+        
+        # Find all ContactGroup records with the duplicate contact,
+        # and only add the master contact if it is not already added to the group.
+        self.contact_groups.each do |cg|
+          unless cg.contacts.include?(master)
+            cg.contacts << master; cg.save!
           end
         end
         
@@ -63,7 +82,13 @@ module Merge
           ContactAlias.find_all_by_contact_id(self.id).each do |ca|
             ca.update_attribute(:contact, master)
           end
-
+          
+          # Remove this contact from any existing mailchimp subscriptions
+          self.delete_chimp_all if self.has_mailchimp_subscription?
+          
+          # add/update mailchimp subscriptions of the merged contact
+          master.mailchimp_lists
+          
           # Create the contact alias and destroy the merged contact.
           if ContactAlias.create(:contact => master,
                                  :destroyed_contact_id => self.id)

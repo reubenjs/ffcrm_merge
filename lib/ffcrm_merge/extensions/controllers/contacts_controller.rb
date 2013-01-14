@@ -22,7 +22,9 @@ ContactsController.class_eval do
   def merge
     # Prepare the fields we want to ignore from the duplicate contact.
     ignored = {"_self" => params["ignore"]["_self"].map{|k,v| k if v == "yes" }.compact}
-
+    ignored["_self"] << "cf_weekly_emails"
+    ignored["_self"] << "cf_supporter_emails"
+    
     # Prepare the custom fields we want to ignore from duplicate contact's supertags.
     ignored["tags"] = {}
     if params[:ignore]["tags"]
@@ -30,7 +32,7 @@ ContactsController.class_eval do
         ignored["tags"][tag] = values.map{|k,v| k if v == "yes" }.compact
       end
     end
-
+    
     @master_contact = Contact.my.find(params[:master_id])
 
     # Reverse the master and duplicate if :reverse_merge is true
@@ -41,6 +43,9 @@ ContactsController.class_eval do
     unless duplicate.merge_with(master, ignored)
       @contact.errors.add_to_base(t('assets_merge_error', :assets => "contacts"))
     end
+    
+    get_data_for_sidebar
+    
   end
   
   # GET /contacts/1/edit                                                   AJAX
