@@ -83,12 +83,6 @@ module Merge
             ca.update_attribute(:contact, master)
           end
           
-          # Remove this contact from any existing mailchimp subscriptions
-          self.delete_chimp_all if self.has_mailchimp_subscription?
-          
-          # add/update mailchimp subscriptions of the merged contact
-          master.mailchimp_lists
-          
           # Create the contact alias and destroy the merged contact.
           if ContactAlias.create(:contact => master,
                                  :destroyed_contact_id => self.id)
