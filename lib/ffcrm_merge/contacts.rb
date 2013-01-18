@@ -51,11 +51,11 @@ module Merge
 
         # Find all AccountContact records with the duplicate contact,
         # and only add the master contact if it is not already added to the account.
-        AccountContact.find_all_by_contact_id(self.id).each do |ac|
-          unless ac.account.contacts.include?(master)
-            ac.contact_id = master.id; ac.save!
-          end
-        end
+        # AccountContact.find_all_by_contact_id(self.id).each do |ac|
+        #           unless ac.account.contacts.include?(master)
+        #             ac.contact_id = master.id; ac.save!
+        #           end
+        #         end
         
         # Find all ContactGroup records with the duplicate contact,
         # and only add the master contact if it is not already added to the group.

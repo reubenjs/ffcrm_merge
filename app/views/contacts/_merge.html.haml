@@ -25,9 +25,9 @@
           %tr
             %th
             %th{ :valign => :top, :style => "font-size: 13px;", :width => "40%" }
-              = "#{t(:duplicate_asset, :asset => t(:contact))}: #{duplicate.name}"
+              = "#{t(:duplicate_asset, :asset => t(:contact))}: #{duplicate.name} at #{duplicate.account.name}"
             %th{ :valign => :top, :style => "font-size: 13px;", :width => "40%" }
-              = "#{t(:master_asset, :asset => t(:contact))}: #{master.name}"
+              = "#{t(:master_asset, :asset => t(:contact))}: #{master.name} at #{master.account.name}"
             - ordered_contact_merge_attributes.each do |attribute|
               - duplicate_value, master_value = duplicate_attributes[attribute], master_attributes[attribute]
               - unless duplicate_value.blank? and master_value.blank?
@@ -46,7 +46,7 @@
     .section
       %h2 Additional data will also be merged
       %ul
-        %li(style="list-style: disc inside") (<strong>#{AccountContact.where(:contact_id => duplicate.id).count}</strong>) accounts
+        -#%li(style="list-style: disc inside") (<strong>#{AccountContact.where(:contact_id => duplicate.id).count}</strong>) accounts
         %li(style="list-style: disc inside") (<strong>#{duplicate.tasks.size}</strong>) tasks
         %li(style="list-style: disc inside") (<strong>#{duplicate.emails.size}</strong>) emails
         %li(style="list-style: disc inside") (<strong>#{duplicate.comments.size}</strong>) comments
