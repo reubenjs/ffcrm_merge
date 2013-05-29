@@ -37,6 +37,9 @@ module Merge
         self.attendances.each do |a|
           a.contact = master; a.save!
         end
+        self.registrations.each do |a|
+          a.contact = master; a.save!
+        end
         
         # Copy weekly emails, supporter emails across
         master.cf_weekly_emails += self.cf_weekly_emails if self.cf_weekly_emails
