@@ -44,8 +44,9 @@ module FfcrmMerge
         self.attendances.each do |a|
           a.contact = master; a.save!
         end
-        self.registrations.each do |a|
-          a.contact = master; a.save!
+        self.registrations.each do |r|
+          #the Saasu contact is swapped using the merge callback (called below)
+          r.contact = master; r.save!
         end
         
         # Copy weekly emails, supporter emails across
@@ -93,6 +94,7 @@ module FfcrmMerge
         master.merge_hook(self)
 
         if master.save!
+          
           # Update any existing aliases that were pointing to the duplicate record
           ContactAlias.find_all_by_contact_id(self.id).each do |ca|
             ca.update_attribute(:contact, master)
