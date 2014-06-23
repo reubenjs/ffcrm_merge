@@ -1,0 +1,31 @@
+<% klass_name = klass.to_s.singularize.downcase %>
+
+<% if params[:cancel].true? or flash[:error].present? %>
+
+  <% if flash[:error].present? %>$(window.alert('<%=flash[:error]%>'));<% end %>
+
+  <%# ensure we replace with either @master or @duplicate depending on the id in @previous %>
+  <% @entity = (@master.id.to_s == @previous.gsub("#{klass_name}_", '')) ? @master : @duplicate %>
+  $('#<%=@previous%>').replaceWith('<%= j(render :partial => "#{klass_name.tableize}/#{klass_name}", :collection => [ @entity ]) %>');
+
+<% elsif @success %>
+
+  <% if @previous.blank? %>
+    <%# we are not on the index page so redirect to the merged entity %>
+    $(window.location.href = "<%= polymorphic_url(@master) %>");
+  <% else %>
+    <% remove_id = (@master.id.to_s == @previous.gsub("#{klass_name}_", '')) ? @duplicate.id : @master.id %>
+    $('#<%=klass_name%>_<%=remove_id%>').remove();
+    $('#<%=@previous%>').replaceWith('<%= j(render :partial => "#{klass_name.tableize}/#{klass_name}", :collection => [ @master ]) %>');
+    $('#<%=@previous%>').effect('highlight', 1000);
+    $('#recently').replaceWith('<%= j(render :partial => "shared/recently") %>');
+  <% end %>
+
+<% else %>
+
+  $(crm.highlight_off('<%=@previous%>'));
+  $(crm.hide_form('create_<%=klass_name%>'));
+  $('#<%=@previous%>').html('<%= j(render :partial => "#{klass_name.tableize}/into", :formats => [:html]) %>');
+  $(crm.set_title('edit_<%=klass_name%>', '<%=t(:merge)%> <%=h(@duplicate.name)%>'));
+
+<% end %>
